@@ -18,10 +18,10 @@
       background: #1e293b;
       padding: 20px;
       border-radius: 12px;
-      width: 400px;
+      width: 420px;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
-    h1 { text-align: center; }
+    h1 { text-align: center; font-size: 20px; }
     textarea {
       width: 100%;
       height: 100px;
@@ -29,6 +29,7 @@
       border: none;
       padding: 10px;
       margin-bottom: 10px;
+      resize: none;
     }
     button {
       width: 100%;
@@ -39,63 +40,82 @@
       color: black;
       font-weight: bold;
       cursor: pointer;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .output {
       background: #020617;
       padding: 10px;
       border-radius: 8px;
-      min-height: 100px;
+      min-height: 120px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>AI Помощник</h1>
+
     <textarea id="input" placeholder="Введите вопрос..."></textarea>
+
     <button onclick="askAI('explain')">Объясни тему</button>
     <button onclick="askAI('solve')">Реши задачу</button>
     <button onclick="askAI('summary')">Сделай кратко</button>
+
     <div class="output" id="output">Ответ появится здесь...</div>
   </div>
 
-  <script>
-    async function askAI(mode) {
-      const input = document.getElementById('input').value;
-      const output = document.getElementById('output');
-      output.innerText = "Думаю...";
+<script>
+async function askAI(mode) {
+  const input = document.getElementById('input').value;
+  const output = document.getElementById('output');
 
-      let systemPrompt = "Ты помощник для школьника. Объясняй просто.";
+  if (!input.trim()) {
+    output.innerText = "Введи вопрос.";
+    return;
+  }
 
-      if (mode === 'solve') {
-        systemPrompt = "Реши задачу пошагово и просто.";
-      }
-      if (mode === 'summary') {
-        systemPrompt = "Сделай краткое объяснение.";
-      }
+  output.innerText = "Думаю...";
 
-      try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer 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"
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: input }
-            ]
-          })
-        });
+  let systemPrompt = "Ты помощник для школьника 7 класса. Объясняй просто.";
 
-        const data = await response.json();
-        output.innerText = data.choices[0].message.content;
-      } catch (error) {
-        output.innerText = "Ошибка: " + error;
-      }
+  if (mode === 'solve') {
+    systemPrompt = "Решай задачу пошагово и объясняй просто.";
+  }
+  if (mode === 'summary') {
+    systemPrompt = "Сделай краткое и понятное объяснение.";
+  }
+
+  try {
+    // 🔥 ПРАВИЛЬНЫЙ вариант (через backend proxy)
+    const response = await fetch("/api/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        input: input,
+        system: systemPrompt
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.answer) {
+      output.innerText = data.answer;
+    } else {
+      output.innerText = "Ошибка сервера: " + JSON.stringify(data);
     }
-  </script>
+
+  } catch (error) {
+    // fallback режим (чтобы не ломалось)
+    output.innerText =
+      "Нет подключения к серверу AI.\n\n" +
+      "Режим демо:\n" +
+      "Ваш вопрос: " + input + "\n\n" +
+      "(Чтобы работал настоящий AI, нужен backend сервер через Vercel/Netlify)";
+  }
+}
+</script>
 </body>
 </html>
+
