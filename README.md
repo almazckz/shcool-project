@@ -124,6 +124,7 @@
   async function askGemini(mode) {
     const key = keyField.value.trim();
     const text = document.getElementById('userInput').value.trim();
+    
     if (!key || !text) return alert("Заполни все поля!");
 
     if (saveCheck.checked) localStorage.setItem('_gemini_api_key', key);
@@ -132,22 +133,45 @@
     outputDiv.innerText = '';
     copyBtn.style.display = 'none';
 
-    // Формируем промпт в зависимости от кнопки
     let instruction = "Ты — помощник ученика 7 класса. ";
     if (mode === 'solve') instruction += "Реши задачу пошагово.";
     if (mode === 'summary') instruction += "Сделай краткий конспект.";
+    if (mode === 'explain') instruction += "Объясни тему простыми словами.";
     
     try {
-      // URL для Gemini 1.5 Flash (самая быстрая и бесплатная модель)
-     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
-      
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
-        })
-      });
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
+        
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
+            })
+        });
+
+        const data = await response.json();
+        
+        // Проверка на ошибки от сервера
+        if (data.error) {
+            throw new Error(`[${data.error.status}]: ${data.error.message}`);
+        }
+
+        // Читаем ответ из структуры Gemini
+        if (data.candidates && data.candidates[0].content) {
+            const aiText = data.candidates[0].content.parts[0].text;
+            outputDiv.innerText = aiText;
+            copyBtn.style.display = 'block';
+        } else {
+            throw new Error("Нейросеть прислала пустой ответ. Возможно, запрос заблокирован фильтрами.");
+        }
+
+    } catch (err) {
+        outputDiv.innerText = "⚠️ Ошибка: " + err.message + 
+                              "\n\nПроверь: \n1. Ключ API (должен быть от Google AI Studio).\n2. Доступ к интернету.";
+    } finally {
+        loader.style.display = 'none';
+    }
+}
 
       const data = await response.json();
       
