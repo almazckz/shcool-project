@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gemini AI Помощник 7 Класс</title>
   <style>
-    /* Дизайн приложения */
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -65,7 +64,7 @@
     .btn-gray { background: #64748b; color: white; grid-column: span 2; margin-top: 5px; font-size: 13px; }
     
     .btn:hover { opacity: 0.9; transform: scale(0.98); }
-    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.5; }
 
     /* Результат */
     .result-area {
@@ -80,12 +79,12 @@
 <body>
 
 <div class="container">
-  <h1>🚀 Gemini Помощник (v1.5)</h1>
+  <h1>🚀 Gemini Помощник (v2.0)</h1>
 
   <div class="key-box">
     <div class="input-row">
-      <input type="password" id="apiKey" placeholder="Вставь Google API Key (AIza...)">
-      <button class="btn-del" onclick="resetKey()" title="Стереть ключ">❌</button>
+      <input type="password" id="apiKey" placeholder="Вставь API Key (AIza...)">
+      <button class="btn-del" onclick="resetKey()">❌</button>
     </div>
     <div style="font-size: 11px; color: #94a3b8;">
       <input type="checkbox" id="saveCheck" checked> <label for="saveCheck" style="cursor:pointer">Запомнить ключ</label>
@@ -102,7 +101,7 @@
     <button onclick="showMyCode()" class="btn btn-gray">🖥️ Посмотреть код страницы</button>
   </div>
 
-  <div id="loader" class="loader">Связываюсь с сервером Google...</div>
+  <div id="loader" class="loader">Связываюсь с Google...</div>
   <div class="result-area" id="output">Ответ появится здесь...</div>
   <button id="copyBtn" class="btn-copy" onclick="copyToClipboard()">📋 Скопировать ответ</button>
 </div>
@@ -114,7 +113,7 @@
   const copyBtn = document.getElementById('copyBtn');
   const loader = document.getElementById('loader');
 
-  // Загружаем ключ при старте
+  // Загрузка ключа
   const saved = localStorage.getItem('_gemini_api_key');
   if (saved) keyField.value = saved;
 
@@ -125,59 +124,69 @@
     }
   }
 
-  // Главная функция
+  // Главная функция с автоматическим подбором рабочего API
   async function askGemini(mode) {
     const key = keyField.value.trim();
     const text = document.getElementById('userInput').value.trim();
     
-    if (!key || !text) return alert("Нужно ввести ключ и вопрос!");
+    if (!key || !text) return alert("Заполни все поля!");
 
     if (saveCheck.checked) {
       localStorage.setItem('_gemini_api_key', key);
-    } else {
-      localStorage.removeItem('_gemini_api_key');
     }
 
     loader.style.display = 'block';
-    outputDiv.innerText = 'Нейросеть пишет ответ...';
+    outputDiv.innerText = 'Ищу рабочий канал связи...';
     copyBtn.style.display = 'none';
 
     let instruction = "Ты — экспертный помощник ученика 7 класса. ";
     if (mode === 'solve') instruction += "Реши задачу пошагово.";
-    if (mode === 'summary') instruction += "Сделай краткий конспект темы.";
+    if (mode === 'summary') instruction += "Сделай краткий конспект.";
     if (mode === 'explain') instruction += "Объясни тему максимально просто.";
     
-    try {
-      // ИСПОЛЬЗУЕМ v1beta И flash-latest - ЭТО САМЫЙ РАБОЧИЙ ВАРИАНТ
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
-      
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
-        })
-      });
+    // Список адресов для обхода ошибки NOT_FOUND
+    const urls = [
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`
+    ];
 
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(`[${data.error.status}]: ${data.error.message}`);
+    let lastError = "";
+
+    for (let url of urls) {
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          lastError = data.error.message;
+          continue; // Пробуем следующий URL
+        }
+
+        if (data.candidates && data.candidates[0].content) {
+          const aiText = data.candidates[0].content.parts[0].text;
+          outputDiv.innerText = aiText;
+          copyBtn.style.display = 'block';
+          loader.style.display = 'none';
+          return; // Успешно выходим
+        }
+      } catch (err) {
+        lastError = err.message;
       }
-
-      if (data.candidates && data.candidates[0].content) {
-        const aiText = data.candidates[0].content.parts[0].text;
-        outputDiv.innerText = aiText;
-        copyBtn.style.display = 'block';
-      } else {
-        throw new Error("Пустой ответ. Попробуй еще раз.");
-      }
-
-    } catch (err) {
-      outputDiv.innerText = "⚠️ Ошибка: " + err.message + "\n\nПроверь свой API-ключ в AI Studio!";
-    } finally {
-      loader.style.display = 'none';
     }
+
+    // Если всё сломалось
+    outputDiv.innerText = "⚠️ Ошибка подключения.\nПричина: " + lastError + 
+                          "\n\nСовет: Если ошибка NOT_FOUND, попробуй создать НОВЫЙ ключ в AI Studio (в новом проекте).";
+    loader.style.display = 'none';
   }
 
   function copyToClipboard() {
@@ -186,17 +195,8 @@
     });
   }
 
+  // Функция просмотра кода
   function showMyCode() {
     const code = document.documentElement.outerHTML;
     const codeWindow = window.open("", "_blank");
-    codeWindow.document.write("<html><head><title>Код приложения</title></head><body style='background: #1e293b; color: #f8fafc; padding: 20px; font-family: monospace;'>");
-    codeWindow.document.write("<h2>Твой HTML/JS Код:</h2>");
-    codeWindow.document.write("<pre style='white-space: pre-wrap; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;'>" + 
-      code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + 
-      "</pre></body></html>");
-    codeWindow.document.close();
-  }
-</script>
-
-</body>
-</html>
+    codeWindow.document.write("<html><head><title>Source Code</title></head><body style='background: #
