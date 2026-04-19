@@ -3,196 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gemini AI Помощник 7 Класс</title>
+  <title>Gemini AI Помощник</title>
   <style>
-    /* Твой дизайн */
     * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 15px;
-    }
-    .container {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-    }
-    h1 { text-align: center; color: #60a5fa; margin: 0 0 20px 0; font-size: 22px; }
-
-    .key-box {
-      background: #0f172a;
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      margin-bottom: 20px;
-    }
-    .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-    input[type="password"] {
-      flex: 1;
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #60a5fa;
-      padding: 10px;
-      border-radius: 8px;
-      outline: none;
-    }
-    .btn-del { background: #ef4444; color: white; border: none; border-radius: 8px; padding: 0 15px; cursor: pointer; }
-
-    textarea {
-      width: 100%; height: 120px;
-      background: #f8fafc; color: #0f172a;
-      border-radius: 12px; padding: 15px;
-      font-size: 16px; resize: none; border: none; outline: none;
-    }
-    .btn-clear { background: #475569; color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 11px; margin: 8px 0 20px 0; cursor: pointer; }
-
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
+    .container { background: #1e293b; padding: 25px; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+    h1 { text-align: center; color: #60a5fa; font-size: 22px; }
+    input, textarea { width: 100%; background: #0f172a; border: 1px solid #334155; color: #60a5fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; outline: none; }
+    textarea { height: 120px; color: white; background: #1e293b; border: 1px solid #475569; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-blue { background: #60a5fa; color: #0f172a; }
-    .btn-yellow { background: #fbbf24; color: #0f172a; grid-column: span 2; }
-    .btn-gray { background: #64748b; color: white; grid-column: span 2; margin-top: 5px; font-size: 13px; }
-    
-    .btn:hover { opacity: 0.9; transform: scale(0.98); }
-    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-    .result-area {
-      background: #020617; padding: 15px; border-radius: 12px;
-      border: 1px solid #334155; min-height: 100px;
-      font-size: 15px; line-height: 1.6; white-space: pre-wrap;
-    }
-    .btn-copy { display: none; width: 100%; margin-top: 10px; background: #10b981; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    .loader { color: #60a5fa; font-size: 14px; font-style: italic; display: none; margin-bottom: 10px; }
+    .btn-gray { background: #475569; color: white; grid-column: span 2; font-size: 13px; }
+    #output { background: #020617; padding: 15px; border-radius: 12px; border: 1px solid #334155; margin-top: 20px; min-height: 80px; white-space: pre-wrap; font-size: 14px; }
+    .loader { color: #fbbf24; font-size: 14px; display: none; margin-top: 10px; text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>🚀 Gemini Помощник (v1.5)</h1>
-
-  <div class="key-box">
-    <div class="input-row">
-      <input type="password" id="apiKey" placeholder="Вставь Google API Key (AIza...)">
-      <button class="btn-del" onclick="resetKey()" title="Стереть ключ">❌</button>
-    </div>
-    <div style="font-size: 11px; color: #94a3b8;">
-      <input type="checkbox" id="saveCheck" checked> <label for="saveCheck" style="cursor:pointer">Запомнить ключ</label>
-    </div>
-  </div>
-
-  <textarea id="userInput" placeholder="Напиши задачу или тему..."></textarea>
-  <button class="btn-clear" onclick="document.getElementById('userInput').value = ''">🧹 Очистить вопрос</button>
-
+  <h1>🚀 AI Помощник 7 Класс</h1>
+  <input type="password" id="apiKey" placeholder="Вставь API-ключ (AIza...)">
+  <textarea id="userInput" placeholder="Напиши задачу или вопрос..."></textarea>
+  
   <div class="actions">
-    <button onclick="askGemini('solve')" class="btn btn-blue">🔢 Решить задачу</button>
-    <button onclick="askGemini('explain')" class="btn btn-blue">📖 Объяснить тему</button>
-    <button onclick="askGemini('summary')" class="btn btn-yellow">📝 Сделать конспект</button>
-    <button onclick="showMyCode()" class="btn btn-gray">🖥️ Посмотреть код страницы</button>
+    <button onclick="askGemini()" class="btn btn-blue">✨ Спросить нейросеть</button>
+    <button onclick="showMyCode()" class="btn btn-gray">🖥️ Посмотреть мой код</button>
   </div>
 
-  <div id="loader" class="loader">Связываюсь с сервером Google...</div>
-  <div class="result-area" id="output">Ответ появится здесь...</div>
-  <button id="copyBtn" class="btn-copy" onclick="copyToClipboard()">📋 Скопировать ответ</button>
+  <div id="loader" class="loader">Связываюсь с Google...</div>
+  <div id="output">Ответ появится здесь...</div>
 </div>
 
 <script>
-  const keyField = document.getElementById('apiKey');
-  const saveCheck = document.getElementById('saveCheck');
-  const outputDiv = document.getElementById('output');
-  const copyBtn = document.getElementById('copyBtn');
-  const loader = document.getElementById('loader');
-
-  // Загружаем ключ из памяти
-  const saved = localStorage.getItem('_gemini_api_key');
-  if (saved) keyField.value = saved;
-
-  function resetKey() {
-    if(confirm("Удалить сохраненный ключ?")) {
-      localStorage.removeItem('_gemini_api_key');
-      keyField.value = '';
-    }
-  }
-
-  // Исправленная функция
-  async function askGemini(mode) {
-    const key = keyField.value.trim();
+  async function askGemini() {
+    const key = document.getElementById('apiKey').value.trim();
     const text = document.getElementById('userInput').value.trim();
-    
-    if (!key || !text) return alert("Нужно ввести ключ и вопрос!");
+    const output = document.getElementById('output');
+    const loader = document.getElementById('loader');
 
-    if (saveCheck.checked) {
-      localStorage.setItem('_gemini_api_key', key);
-    } else {
-      localStorage.removeItem('_gemini_api_key');
-    }
+    if (!key || !text) return alert("Заполни ключ и вопрос!");
 
     loader.style.display = 'block';
-    outputDiv.innerText = 'Нейросеть пишет ответ...';
-    copyBtn.style.display = 'none';
+    output.innerText = "Нейросеть думает...";
 
-    let instruction = "Ты — экспертный помощник ученика 7 класса. ";
-    if (mode === 'solve') instruction += "Реши задачу пошагово.";
-    if (mode === 'summary') instruction += "Сделай краткий конспект темы.";
-    if (mode === 'explain') instruction += "Объясни тему максимально просто.";
-    
     try {
-      // ИСПОЛЬЗУЕМ gemini-pro КАК САМЫЙ СТАБИЛЬНЫЙ ВАРИАНТ ПРИ ОШИБКАХ NOT_FOUND
+      // ИСПОЛЬЗУЕМ ВЕРСИЮ 1.0 PRO — ОНА САМАЯ СТАБИЛЬНАЯ ДЛЯ НОВЫХ КЛЮЧЕЙ
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
-      
+
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
+          contents: [{ parts: [{ text: "Ты помощник ученика 7 класса. Отвечай кратко и понятно. Вопрос: " + text }] }]
         })
       });
 
       const data = await response.json();
-      
+
       if (data.error) {
-        throw new Error(`[${data.error.status}]: ${data.error.message}`);
-      }
-
-      if (data.candidates && data.candidates[0].content) {
-        const aiText = data.candidates[0].content.parts[0].text;
-        outputDiv.innerText = aiText;
-        copyBtn.style.display = 'block';
+        output.innerText = "❌ Ошибка: " + data.error.message;
+      } else if (data.candidates && data.candidates[0].content) {
+        output.innerText = data.candidates[0].content.parts[0].text;
       } else {
-        throw new Error("Пустой ответ. Попробуй еще раз.");
+        output.innerText = "⚠️ Ответ пустой. Попробуй другой вопрос.";
       }
-
     } catch (err) {
-      outputDiv.innerText = "⚠️ Ошибка: " + err.message + 
-                            "\n\nЕсли пишет NOT_FOUND, создай в AI Studio НОВЫЙ ключ через 'Create API key in NEW project'.";
+      output.innerText = "⚠️ Ошибка сети: " + err.message;
     } finally {
       loader.style.display = 'none';
     }
   }
 
-  function copyToClipboard() {
-    navigator.clipboard.writeText(outputDiv.innerText).then(() => {
-      alert("Скопировано!");
-    });
-  }
-
-  // Твоя новая кнопка "Посмотреть код"
   function showMyCode() {
     const code = document.documentElement.outerHTML;
-    const codeWindow = window.open("", "_blank");
-    codeWindow.document.write("<html><head><title>Код приложения</title></head><body style='background: #1e293b; color: #f8fafc; padding: 20px; font-family: monospace;'>");
-    codeWindow.document.write("<h2>Твой HTML/JS Код:</h2>");
-    codeWindow.document.write("<pre style='white-space: pre-wrap; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;'>" + 
+    const win = window.open("", "_blank");
+    win.document.write("<html><body style='background:#1e293b;color:white;padding:20px;'><pre>" + 
       code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + 
       "</pre></body></html>");
-    codeWindow.document.close();
+    win.document.close();
   }
 </script>
 
