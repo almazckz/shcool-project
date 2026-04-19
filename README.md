@@ -2,120 +2,177 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Помощник для учебы</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #0f172a;
       color: white;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 20px;
     }
     .container {
       background: #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-      width: 420px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 25px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    h1 { text-align: center; font-size: 20px; }
+    h1 { text-align: center; font-size: 22px; margin-top: 0; color: #38bdf8; }
+    
+    .key-section {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #334155;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #020617;
+      color: #38bdf8;
+      font-size: 12px;
+    }
+
     textarea {
       width: 100%;
-      height: 100px;
+      height: 120px;
       border-radius: 8px;
       border: none;
-      padding: 10px;
-      margin-bottom: 10px;
-      resize: none;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 16px;
+      resize: vertical;
     }
+    
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
     button {
-      width: 100%;
-      padding: 10px;
+      padding: 12px;
       border: none;
       border-radius: 8px;
       background: #38bdf8;
-      color: black;
+      color: #020617;
       font-weight: bold;
       cursor: pointer;
-      margin-bottom: 8px;
+      transition: opacity 0.2s;
     }
+    
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .full-width { grid-column: span 2; background: #fbbf24; }
+
     .output {
       background: #020617;
-      padding: 10px;
+      padding: 15px;
       border-radius: 8px;
-      min-height: 120px;
+      min-height: 100px;
+      border: 1px solid #334155;
+      line-height: 1.5;
       white-space: pre-wrap;
+      font-size: 15px;
     }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <h1>AI Помощник</h1>
+    <h1>AI Помощник 7 класс</h1>
 
-    <textarea id="input" placeholder="Введите вопрос..."></textarea>
+    <div class="key-section">
+      <input type="password" id="apiKey" placeholder="Вставьте ваш OpenAI API Key здесь..." />
+      <p style="font-size: 10px; color: #94a3b8; margin: 5px 0 0 0;">Ключ хранится только в вашем браузере.</p>
+    </div>
 
-    <button onclick="askAI('explain')">Объясни тему</button>
-    <button onclick="askAI('solve')">Реши задачу</button>
-    <button onclick="askAI('summary')">Сделай кратко</button>
+    <textarea id="input" placeholder="Напиши условие задачи или тему..."></textarea>
 
-    <div class="output" id="output">Ответ появится здесь...</div>
+    <div class="buttons">
+      <button onclick="askAI('solve')">Реши задачу</button>
+      <button onclick="askAI('explain')">Объясни тему</button>
+      <button onclick="askAI('summary')" class="full-width">Сделай краткий конспект</button>
+    </div>
+
+    <div class="output" id="output">Здесь появится ответ...</div>
   </div>
 
 <script>
+// Автоматически подгружаем ключ из памяти браузера, если он там есть
+document.getElementById('apiKey').value = localStorage.getItem('openai_key') || '';
+
 async function askAI(mode) {
-  const input = document.getElementById('input').value;
+  const key = document.getElementById('apiKey').value.trim();
+  const input = document.getElementById('input').value.trim();
   const output = document.getElementById('output');
 
-  if (!input.trim()) {
-    output.innerText = "Введи вопрос.";
+  if (!key) {
+    alert("Пожалуйста, введите API ключ!");
     return;
   }
 
-  output.innerText = "Думаю...";
-
-  let systemPrompt = "Ты помощник для школьника 7 класса. Объясняй просто.";
-
-  if (mode === 'solve') {
-    systemPrompt = "Решай задачу пошагово и объясняй просто.";
+  if (!input) {
+    output.innerText = "Сначала напиши вопрос.";
+    return;
   }
-  if (mode === 'summary') {
-    systemPrompt = "Сделай краткое и понятное объяснение.";
-  }
+
+  // Сохраняем ключ, чтобы не вводить его каждый раз
+  localStorage.setItem('openai_key', key);
+
+  output.innerText = "Нейросеть готовит ответ...";
+  
+  // Блокируем кнопки
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(b => b.disabled = true);
+
+  let systemPrompt = "Ты добрый помощник для ученика 7 класса. Используй простые термины.";
+  if (mode === 'solve') systemPrompt = "Реши школьную задачу пошагово. В конце напиши краткий ответ.";
+  if (mode === 'summary') systemPrompt = "Составь краткий и понятный конспект темы. Используй списки.";
 
   try {
-    // 🔥 ПРАВИЛЬНЫЙ вариант (через backend proxy)
-    const response = await fetch("/api/ask", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${key}`
       },
       body: JSON.stringify({
-        input: input,
-        system: systemPrompt
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: input }
+        ],
+        temperature: 0.7
       })
     });
 
     const data = await response.json();
 
-    if (data.answer) {
-      output.innerText = data.answer;
+    if (data.choices && data.choices[0]) {
+      output.innerText = data.choices[0].message.content;
     } else {
-      output.innerText = "Ошибка сервера: " + JSON.stringify(data);
+      output.innerText = "Ошибка: " + (data.error ? data.error.message : "Проверьте ключ");
     }
 
   } catch (error) {
-    // fallback режим (чтобы не ломалось)
-    output.innerText =
-      "Нет подключения к серверу AI.\n\n" +
-      "Режим демо:\n" +
-      "Ваш вопрос: " + input + "\n\n" +
-      "(Чтобы работал настоящий AI, нужен backend сервер через Vercel/Netlify)";
+    output.innerText = "Ошибка связи: " + error.message;
+  } finally {
+    buttons.forEach(b => b.disabled = false);
   }
 }
 </script>
 </body>
 </html>
-
