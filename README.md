@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gemini AI Помощник 7 Класс</title>
   <style>
-    /* Основное оформление */
+    /* Дизайн приложения */
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -57,7 +57,7 @@
     }
     .btn-clear { background: #475569; color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 11px; margin: 8px 0 20px 0; cursor: pointer; }
 
-    /* Кнопки управления */
+    /* Кнопки */
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-blue { background: #60a5fa; color: #0f172a; }
@@ -65,9 +65,9 @@
     .btn-gray { background: #64748b; color: white; grid-column: span 2; margin-top: 5px; font-size: 13px; }
     
     .btn:hover { opacity: 0.9; transform: scale(0.98); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    /* Вывод результата */
+    /* Результат */
     .result-area {
       background: #020617; padding: 15px; border-radius: 12px;
       border: 1px solid #334155; min-height: 100px;
@@ -80,7 +80,7 @@
 <body>
 
 <div class="container">
-  <h1>🚀 Gemini Помощник (v1)</h1>
+  <h1>🚀 Gemini Помощник (v1.5)</h1>
 
   <div class="key-box">
     <div class="input-row">
@@ -102,24 +102,22 @@
     <button onclick="showMyCode()" class="btn btn-gray">🖥️ Посмотреть код страницы</button>
   </div>
 
-  <div id="loader" class="loader">Связываюсь с Google Gemini...</div>
+  <div id="loader" class="loader">Связываюсь с сервером Google...</div>
   <div class="result-area" id="output">Ответ появится здесь...</div>
   <button id="copyBtn" class="btn-copy" onclick="copyToClipboard()">📋 Скопировать ответ</button>
 </div>
 
 <script>
-  // Элементы
   const keyField = document.getElementById('apiKey');
   const saveCheck = document.getElementById('saveCheck');
   const outputDiv = document.getElementById('output');
   const copyBtn = document.getElementById('copyBtn');
   const loader = document.getElementById('loader');
 
-  // Загрузка ключа из памяти
-  const savedKey = localStorage.getItem('_gemini_api_key');
-  if (savedKey) keyField.value = savedKey;
+  // Загружаем ключ при старте
+  const saved = localStorage.getItem('_gemini_api_key');
+  if (saved) keyField.value = saved;
 
-  // Очистка ключа
   function resetKey() {
     if(confirm("Удалить сохраненный ключ?")) {
       localStorage.removeItem('_gemini_api_key');
@@ -128,11 +126,11 @@
   }
 
   // Главная функция
-async function askGemini(mode) {
+  async function askGemini(mode) {
     const key = keyField.value.trim();
     const text = document.getElementById('userInput').value.trim();
     
-    if (!key || !text) return alert("Заполни ключ и напиши вопрос!");
+    if (!key || !text) return alert("Нужно ввести ключ и вопрос!");
 
     if (saveCheck.checked) {
       localStorage.setItem('_gemini_api_key', key);
@@ -141,16 +139,16 @@ async function askGemini(mode) {
     }
 
     loader.style.display = 'block';
-    outputDiv.innerText = 'Связываюсь с сервером...';
+    outputDiv.innerText = 'Нейросеть пишет ответ...';
     copyBtn.style.display = 'none';
 
-    let instruction = "Ты — помощник ученика 7 класса. ";
+    let instruction = "Ты — экспертный помощник ученика 7 класса. ";
     if (mode === 'solve') instruction += "Реши задачу пошагово.";
-    if (mode === 'summary') instruction += "Сделай краткий конспект.";
+    if (mode === 'summary') instruction += "Сделай краткий конспект темы.";
     if (mode === 'explain') instruction += "Объясни тему максимально просто.";
     
     try {
-      // ИСПОЛЬЗУЕМ v1beta И gemini-1.5-flash-latest
+      // ИСПОЛЬЗУЕМ v1beta И flash-latest - ЭТО САМЫЙ РАБОЧИЙ ВАРИАНТ
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
       
       const response = await fetch(url, {
@@ -164,10 +162,6 @@ async function askGemini(mode) {
       const data = await response.json();
       
       if (data.error) {
-        // Если ошибка 404 (модель не найдена), пробуем запасной вариант
-        if (data.error.status === "NOT_FOUND") {
-            throw new Error("Модель Flash не найдена. Попробуй в AI Studio проверить, создавал ли ты API Key для 'Gemini 1.5 Flash'.");
-        }
         throw new Error(`[${data.error.status}]: ${data.error.message}`);
       }
 
@@ -176,75 +170,27 @@ async function askGemini(mode) {
         outputDiv.innerText = aiText;
         copyBtn.style.display = 'block';
       } else {
-        throw new Error("Ответ пустой. Возможно, запрос заблокирован фильтрами.");
+        throw new Error("Пустой ответ. Попробуй еще раз.");
       }
 
     } catch (err) {
-      outputDiv.innerText = "⚠️ Ошибка: " + err.message + "\n\nСовет: Убедись, что при создании ключа в AI Studio ты нажал 'Create API key in new project'.";
-    } finally {
-      loader.style.display = 'none';
-    }
-  }
-    // Сохранение
-    if (saveCheck.checked) {
-      localStorage.setItem('_gemini_api_key', key);
-    } else {
-      localStorage.removeItem('_gemini_api_key');
-    }
-
-    loader.style.display = 'block';
-    outputDiv.innerText = 'Думаю...';
-    copyBtn.style.display = 'none';
-
-    let instruction = "Ты — помощник ученика 7 класса. ";
-    if (mode === 'solve') instruction += "Реши задачу пошагово.";
-    if (mode === 'summary') instruction += "Сделай краткий конспект.";
-    if (mode === 'explain') instruction += "Объясни тему максимально просто.";
-    
-    try {
-      // URL стабильной версии v1
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
-      
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.error) throw new Error(`[${data.error.status}]: ${data.error.message}`);
-
-      if (data.candidates && data.candidates[0].content) {
-        const aiText = data.candidates[0].content.parts[0].text;
-        outputDiv.innerText = aiText;
-        copyBtn.style.display = 'block';
-      } else {
-        throw new Error("Ответ пустой. Возможно, сработали фильтры безопасности.");
-      }
-
-    } catch (err) {
-      outputDiv.innerText = "⚠️ Ошибка: " + err.message + "\n\nПроверь свой API Key!";
+      outputDiv.innerText = "⚠️ Ошибка: " + err.message + "\n\nПроверь свой API-ключ в AI Studio!";
     } finally {
       loader.style.display = 'none';
     }
   }
 
-  // Копирование
   function copyToClipboard() {
     navigator.clipboard.writeText(outputDiv.innerText).then(() => {
-      alert("Текст скопирован!");
+      alert("Скопировано!");
     });
   }
 
-  // Просмотр кода
   function showMyCode() {
     const code = document.documentElement.outerHTML;
     const codeWindow = window.open("", "_blank");
-    codeWindow.document.write("<html><head><title>Source Code</title></head><body style='background: #1e293b; color: #f8fafc; padding: 20px; font-family: monospace;'>");
-    codeWindow.document.write("<h2>Твой чистый код приложения:</h2>");
+    codeWindow.document.write("<html><head><title>Код приложения</title></head><body style='background: #1e293b; color: #f8fafc; padding: 20px; font-family: monospace;'>");
+    codeWindow.document.write("<h2>Твой HTML/JS Код:</h2>");
     codeWindow.document.write("<pre style='white-space: pre-wrap; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;'>" + 
       code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + 
       "</pre></body></html>");
