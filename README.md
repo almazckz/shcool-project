@@ -154,7 +154,129 @@
   const keyInput = document.getElementById('apiKey');
   keyInput.value = localStorage.getItem('_helper_key') || '';
 
-  async function runAI(mode) {
+async function runAI(mode) {
+    const key = keyInput.value.trim();
+    const prompt = document.getElementById('userInput').value.trim();
+    const status = document.getElementById('status');
+    const buttons = document.querySelectorAll('button');
+
+    if (!key) return alert("Нужен API-ключ!");
+    if (!prompt) return alert("Напиши вопрос!");
+
+    // Управление сохранением: если галочка стоит — сохраняем, если нет — удаляем
+    if (saveCheckbox.checked) {
+      localStorage.setItem('_helper_key', key);
+    } else {
+      localStorage.removeItem('_helper_key');
+    }
+
+    status.style.display = 'block';
+    resultDisplay.innerText = '';
+    
+    // Блокируем кнопки на время запроса
+    buttons.forEach(b => b.disabled = true);
+
+    let systemMsg = "Ты — помощник для ученика 7 класса.";
+    if (mode === 'solve') systemMsg += " Реши задачу по шагам.";
+    if (mode === 'summary') systemMsg += " Сделай краткий конспект.";
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: systemMsg },
+            { role: "user", content: prompt }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Если API вернул ошибку (например, кончились деньги)
+        throw new Error(data.error ? data.error.message : "Ошибка API");
+      }
+
+      // Выводим результат
+      resultDisplay.innerText = data.choices[0].message.content;
+
+    } catch (err) {
+      // Обработка сетевых ошибок (включая Failed to fetch)
+      resultDisplay.innerText = "⚠️ Ошибка:\n" + err.message + 
+                                 "\n\nПроверь VPN или баланс ключа.";
+    } finally {
+      // В любом случае убираем надпись "Думаю" и включаем кнопки
+      status.style.display = 'none';
+      buttons.forEach(b => b.disabled = false);
+    }
+  }
+    const key = keyInput.value.trim();
+    const prompt = document.getElementById('userInput').value.trim();
+    const status = document.getElementById('status');
+    const buttons = document.querySelectorAll('button');
+
+    if (!key) return alert("Нужен API-ключ!");
+    if (!prompt) return alert("Напиши вопрос!");
+
+    // Управление сохранением: если галочка стоит — сохраняем, если нет — удаляем
+    if (saveCheckbox.checked) {
+      localStorage.setItem('_helper_key', key);
+    } else {
+      localStorage.removeItem('_helper_key');
+    }
+
+    status.style.display = 'block';
+    resultDisplay.innerText = '';
+    
+    // Блокируем кнопки на время запроса
+    buttons.forEach(b => b.disabled = true);
+
+    let systemMsg = "Ты — помощник для ученика 7 класса.";
+    if (mode === 'solve') systemMsg += " Реши задачу по шагам.";
+    if (mode === 'summary') systemMsg += " Сделай краткий конспект.";
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: systemMsg },
+            { role: "user", content: prompt }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Если API вернул ошибку (например, кончились деньги)
+        throw new Error(data.error ? data.error.message : "Ошибка API");
+      }
+
+      // Выводим результат
+      resultDisplay.innerText = data.choices[0].message.content;
+
+    } catch (err) {
+      // Обработка сетевых ошибок (включая Failed to fetch)
+      resultDisplay.innerText = "⚠️ Ошибка:\n" + err.message + 
+                                 "\n\nПроверь VPN или баланс ключа.";
+    } finally {
+      // В любом случае убираем надпись "Думаю" и включаем кнопки
+      status.style.display = 'none';
+      buttons.forEach(b => b.disabled = false);
+    }
+  }
     const key = keyInput.value.trim();
     const prompt = document.getElementById('userInput').value.trim();
     const status = document.getElementById('status');
