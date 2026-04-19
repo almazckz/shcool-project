@@ -128,12 +128,63 @@
   }
 
   // Главная функция
-  async function askGemini(mode) {
+async function askGemini(mode) {
     const key = keyField.value.trim();
     const text = document.getElementById('userInput').value.trim();
     
     if (!key || !text) return alert("Заполни ключ и напиши вопрос!");
 
+    if (saveCheck.checked) {
+      localStorage.setItem('_gemini_api_key', key);
+    } else {
+      localStorage.removeItem('_gemini_api_key');
+    }
+
+    loader.style.display = 'block';
+    outputDiv.innerText = 'Связываюсь с сервером...';
+    copyBtn.style.display = 'none';
+
+    let instruction = "Ты — помощник ученика 7 класса. ";
+    if (mode === 'solve') instruction += "Реши задачу пошагово.";
+    if (mode === 'summary') instruction += "Сделай краткий конспект.";
+    if (mode === 'explain') instruction += "Объясни тему максимально просто.";
+    
+    try {
+      // ИСПОЛЬЗУЕМ v1beta И gemini-1.5-flash-latest
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
+      
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        // Если ошибка 404 (модель не найдена), пробуем запасной вариант
+        if (data.error.status === "NOT_FOUND") {
+            throw new Error("Модель Flash не найдена. Попробуй в AI Studio проверить, создавал ли ты API Key для 'Gemini 1.5 Flash'.");
+        }
+        throw new Error(`[${data.error.status}]: ${data.error.message}`);
+      }
+
+      if (data.candidates && data.candidates[0].content) {
+        const aiText = data.candidates[0].content.parts[0].text;
+        outputDiv.innerText = aiText;
+        copyBtn.style.display = 'block';
+      } else {
+        throw new Error("Ответ пустой. Возможно, запрос заблокирован фильтрами.");
+      }
+
+    } catch (err) {
+      outputDiv.innerText = "⚠️ Ошибка: " + err.message + "\n\nСовет: Убедись, что при создании ключа в AI Studio ты нажал 'Create API key in new project'.";
+    } finally {
+      loader.style.display = 'none';
+    }
+  }
     // Сохранение
     if (saveCheck.checked) {
       localStorage.setItem('_gemini_api_key', key);
