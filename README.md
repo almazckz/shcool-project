@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!Bosh #2>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -124,6 +124,15 @@
   <h1>AI Учеба 7 Класс</h1>
 
   <div class="key-section">
+  <label>OpenAI API Key</label>
+  <input type="password" id="apiKey" placeholder="sk-..." />
+  <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+    <input type="checkbox" id="saveKey" style="cursor: pointer;">
+    <label for="saveKey" style="font-size: 11px; color: #94a3b8; cursor: pointer; text-transform: none;">
+      Запомнить ключ на этом устройстве
+    </label>
+  </div>
+</div>
     <label>OpenAI API Key</label>
     <input type="password" id="apiKey" placeholder="sk-..." />
   </div>
