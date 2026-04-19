@@ -79,7 +79,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer YOUR_API_KEY"
+            "Authorization": "Bearer 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"
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
