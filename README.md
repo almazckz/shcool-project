@@ -121,7 +121,7 @@
 <body>
 
 <div class="container">
-  <h1>AI Учеба 7 Класс</h1>
+  <h1>AI Помошник</h1>
 
   <div class="key-section">
   <label>OpenAI API Key</label>
