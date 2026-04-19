@@ -1,144 +1,213 @@
-<Shcool Bosh#2>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Помощник</title>
   <style>
-    /* ОБЩИЙ СТИЛЬ */
     * { box-sizing: border-box; }
-    body { 
-      font-family: 'Segoe UI', system-ui, sans-serif; 
-      background: #0f172a; 
-      color: #f8fafc; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      min-height: 100vh; 
-      margin: 0; 
-      padding: 15px; 
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 15px;
     }
-
-    /* КОНТЕЙНЕР ПРИЛОЖЕНИЯ */
-    .container { 
-      background: #1e293b; 
-      padding: 25px; 
-      border-radius: 20px; 
-      width: 100%; 
-      max-width: 500px; 
-      box-shadow: 0 25px 50px rgba(0,0,0,0.5); 
+    .container {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
       border: 1px solid #334155;
     }
-
     h1 { text-align: center; color: #60a5fa; margin: 0 0 20px 0; font-size: 22px; }
 
-    /* ПОЛЯ ВВОДА */
-    input, textarea { 
-      width: 100%; 
-      background: #0f172a; 
-      border: 1px solid #334155; 
-      color: #60a5fa; 
-      padding: 12px; 
-      border-radius: 10px; 
-      margin-bottom: 15px; 
-      outline: none; 
+    .key-wrap { position: relative; margin-bottom: 15px; }
+    .key-wrap input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #60a5fa;
+      padding: 12px 40px 12px 12px;
+      border-radius: 10px;
+      margin-bottom: 0;
+      outline: none;
       transition: 0.3s;
     }
-    
-    textarea { 
-      height: 120px; 
-      color: #f8fafc; 
-      background: #1e293b; 
-      border: 1px solid #475569; 
-      resize: none; 
-      font-size: 15px;
+    .key-wrap button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #60a5fa;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
     }
 
-    input:focus, textarea:focus { border-color: #60a5fa; }
+    textarea {
+      width: 100%;
+      height: 120px;
+      color: #f8fafc;
+      background: #1e293b;
+      border: 1px solid #475569;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      outline: none;
+      resize: none;
+      font-size: 15px;
+      transition: 0.3s;
+      font-family: inherit;
+    }
+    textarea:focus { border-color: #60a5fa; }
 
-    /* КНОПКИ */
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
-    .btn { 
-      padding: 12px; 
-      border: none; 
-      border-radius: 10px; 
-      font-weight: bold; 
-      cursor: pointer; 
-      transition: 0.2s; 
+    .btn {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
       font-size: 14px;
     }
-
     .btn-blue { background: #60a5fa; color: #0f172a; width: 100%; grid-column: span 2; margin-bottom: 5px; }
     .btn-blue:hover { background: #93c5fd; transform: scale(0.98); }
-
     .btn-gray { background: #475569; color: white; }
     .btn-gray:hover { background: #64748b; }
 
-    /* ВЫВОД РЕЗУЛЬТАТА */
-    #output { 
-      background: #020617; 
-      padding: 15px; 
-      border-radius: 12px; 
-      border: 1px solid #334155; 
-      margin-top: 20px; 
-      min-height: 100px; 
-      white-space: pre-wrap; 
+    #output {
+      background: #020617;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      margin-top: 20px;
+      min-height: 100px;
+      white-space: pre-wrap;
       font-size: 15px;
       line-height: 1.6;
     }
-
-    .loader { 
-      color: #fbbf24; 
-      font-size: 14px; 
-      display: none; 
-      margin: 10px 0; 
-      text-align: center; 
+    .loader {
+      color: #fbbf24;
+      font-size: 14px;
+      display: none;
+      margin: 10px 0;
+      text-align: center;
       font-style: italic;
     }
+    .error { color: #f87171; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <h1>🚀 AI Помощник</h1>
-  
-  <input type="password" id="apiKey" placeholder="Вставь API-ключ (AIza...)">
-  
+
+  <!-- ИСПРАВЛЕНИЕ 1: обёртка с кнопкой показать/скрыть ключ -->
+  <div class="key-wrap">
+    <input type="password" id="apiKey" placeholder="Вставь API-ключ Gemini (AIza...)">
+    <button onclick="toggleKey()" id="eyeBtn" title="Показать/скрыть ключ">👁</button>
+  </div>
+
   <textarea id="userInput" placeholder="Напиши задачу или вопрос..."></textarea>
-  
-  <div class="loader" id="loader"> Нейросеть обрабатывает запрос...</div>
+
+  <div class="loader" id="loader">Нейросеть обрабатывает запрос...</div>
 
   <div class="actions">
     <button onclick="askGemini()" class="btn btn-blue">Отправить запрос</button>
-    <button onclick="document.getElementById('userInput').value = ''" class="btn btn-gray"> Очистить</button>
-    <button onclick="showMyCode()" class="btn btn-gray">Код</button>
+    <button onclick="document.getElementById('userInput').value = ''" class="btn btn-gray">Очистить</button>
+    <!-- ИСПРАВЛЕНИЕ 2: кнопка "Код" теперь реально что-то делает -->
+    <button onclick="showMyCode()" class="btn btn-gray">Мой код</button>
   </div>
 
   <div id="output">Ответ появится здесь...</div>
 </div>
 
 <script>
-  // Автоматическая загрузка сохраненного ключа
   const keyField = document.getElementById('apiKey');
-  const savedKey = localStorage.getItem('_my_gemini_key');
-  if (savedKey) keyField.value = savedKey;
+  const output = document.getElementById('output');
+  const loader = document.getElementById('loader');
+
+  // ИСПРАВЛЕНИЕ 3: localStorage в try/catch
+  try {
+    const savedKey = localStorage.getItem('_my_gemini_key');
+    if (savedKey) keyField.value = savedKey;
+  } catch (e) {
+    console.warn('localStorage недоступен:', e);
+  }
+
+  function toggleKey() {
+    keyField.type = keyField.type === 'password' ? 'text' : 'password';
+  }
 
   async function askGemini() {
     const key = keyField.value.trim();
     const text = document.getElementById('userInput').value.trim();
-    const output = document.getElementById('output');
-    const loader = document.getElementById('loader');
 
-    if (!key || !text) return alert("Нужно ввести ключ и твой вопрос!");
+    if (!key || !text) {
+      alert('Нужно ввести ключ и вопрос!');
+      return;
+    }
 
-    // Сохраняем ключ локально, чтобы не вводить заново
-    localStorage.setItem('_my_gemini_key', key);
+    // ИСПРАВЛЕНИЕ 3: сохраняем ключ безопасно
+    try {
+      localStorage.setItem('_my_gemini_key', key);
+    } catch (e) {}
 
     loader.style.display = 'block';
-    output.innerText = "Думаю...";
-    output.style.opacity = "0.5";
+    output.textContent = 'Думаю...';  // ИСПРАВЛЕНИЕ 6: textContent вместо innerText
+    output.style.opacity = '0.5';
+    output.className = '';
 
+    // ИСПРАВЛЕНИЕ 4 + 5: полный URL и try/catch вокруг запроса
     try {
-      // ИСПОЛЬЗУЕМ СТАБИЛЬНУЮ ВЕРСИЮ V1 И МОДЕЛЬ 1.5-FLASH
-      const url = `https://generativelanguage.googleapis.
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text }] }]
+        })
+      });
+
+      const data = await response.json();
+
+      // Обработка ошибок от API
+      if (!response.ok) {
+        const msg = data?.error?.message || `Ошибка ${response.status}`;
+        throw new Error(msg);
+      }
+
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!reply) throw new Error('Пустой ответ от модели. Попробуй ещё раз.');
+
+      output.textContent = reply;
+
+    } catch (err) {
+      output.textContent = '❌ Ошибка: ' + err.message;
+      output.classList.add('error');
+    } finally {
+      // ИСПРАВЛЕНИЕ 5: loader скрывается всегда — и при успехе, и при ошибке
+      loader.style.display = 'none';
+      output.style.opacity = '1';
+    }
+  }
+
+  // ИСПРАВЛЕНИЕ 2: функция теперь определена
+  function showMyCode() {
+    output.textContent = document.documentElement.outerHTML;
+  }
+</script>
+
+</body>
+</html>
