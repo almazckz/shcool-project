@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<Shcool Bosh#2>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Помощник 7 Класс</title>
+  <title>AI Помощник</title>
   <style>
     /* ОБЩИЙ СТИЛЬ */
     * { box-sizing: border-box; }
@@ -101,18 +101,18 @@
 <body>
 
 <div class="container">
-  <h1>🚀 AI Помощник 7 Класс</h1>
+  <h1>🚀 AI Помощник</h1>
   
   <input type="password" id="apiKey" placeholder="Вставь API-ключ (AIza...)">
   
-  <textarea id="userInput" placeholder="Напиши задачу или вопрос (например, по физике или геометрии)..."></textarea>
+  <textarea id="userInput" placeholder="Напиши задачу или вопрос..."></textarea>
   
-  <div class="loader" id="loader">⚡ Нейросеть обрабатывает запрос...</div>
+  <div class="loader" id="loader"> Нейросеть обрабатывает запрос...</div>
 
   <div class="actions">
-    <button onclick="askGemini()" class="btn btn-blue">✨ Отправить запрос</button>
-    <button onclick="document.getElementById('userInput').value = ''" class="btn btn-gray">🧹 Очистить</button>
-    <button onclick="showMyCode()" class="btn btn-gray">🖥️ Код</button>
+    <button onclick="askGemini()" class="btn btn-blue">Отправить запрос</button>
+    <button onclick="document.getElementById('userInput').value = ''" class="btn btn-gray"> Очистить</button>
+    <button onclick="showMyCode()" class="btn btn-gray">Код</button>
   </div>
 
   <div id="output">Ответ появится здесь...</div>
