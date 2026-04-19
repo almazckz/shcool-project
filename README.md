@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gemini AI Помощник 7 Класс</title>
   <style>
+    /* Твой дизайн */
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -27,7 +28,6 @@
     }
     h1 { text-align: center; color: #60a5fa; margin: 0 0 20px 0; font-size: 22px; }
 
-    /* Поле ключа */
     .key-box {
       background: #0f172a;
       padding: 15px;
@@ -47,7 +47,6 @@
     }
     .btn-del { background: #ef4444; color: white; border: none; border-radius: 8px; padding: 0 15px; cursor: pointer; }
 
-    /* Поле ввода */
     textarea {
       width: 100%; height: 120px;
       background: #f8fafc; color: #0f172a;
@@ -56,7 +55,6 @@
     }
     .btn-clear { background: #475569; color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 11px; margin: 8px 0 20px 0; cursor: pointer; }
 
-    /* Кнопки */
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .btn { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-blue { background: #60a5fa; color: #0f172a; }
@@ -64,9 +62,8 @@
     .btn-gray { background: #64748b; color: white; grid-column: span 2; margin-top: 5px; font-size: 13px; }
     
     .btn:hover { opacity: 0.9; transform: scale(0.98); }
-    .btn:disabled { opacity: 0.5; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    /* Результат */
     .result-area {
       background: #020617; padding: 15px; border-radius: 12px;
       border: 1px solid #334155; min-height: 100px;
@@ -79,12 +76,12 @@
 <body>
 
 <div class="container">
-  <h1>🚀 Gemini Помощник (v2.0)</h1>
+  <h1>🚀 Gemini Помощник (v1.5)</h1>
 
   <div class="key-box">
     <div class="input-row">
-      <input type="password" id="apiKey" placeholder="Вставь API Key (AIza...)">
-      <button class="btn-del" onclick="resetKey()">❌</button>
+      <input type="password" id="apiKey" placeholder="Вставь Google API Key (AIza...)">
+      <button class="btn-del" onclick="resetKey()" title="Стереть ключ">❌</button>
     </div>
     <div style="font-size: 11px; color: #94a3b8;">
       <input type="checkbox" id="saveCheck" checked> <label for="saveCheck" style="cursor:pointer">Запомнить ключ</label>
@@ -101,7 +98,7 @@
     <button onclick="showMyCode()" class="btn btn-gray">🖥️ Посмотреть код страницы</button>
   </div>
 
-  <div id="loader" class="loader">Связываюсь с Google...</div>
+  <div id="loader" class="loader">Связываюсь с сервером Google...</div>
   <div class="result-area" id="output">Ответ появится здесь...</div>
   <button id="copyBtn" class="btn-copy" onclick="copyToClipboard()">📋 Скопировать ответ</button>
 </div>
@@ -113,7 +110,7 @@
   const copyBtn = document.getElementById('copyBtn');
   const loader = document.getElementById('loader');
 
-  // Загрузка ключа
+  // Загружаем ключ из памяти
   const saved = localStorage.getItem('_gemini_api_key');
   if (saved) keyField.value = saved;
 
@@ -124,69 +121,60 @@
     }
   }
 
-  // Главная функция с автоматическим подбором рабочего API
+  // Исправленная функция
   async function askGemini(mode) {
     const key = keyField.value.trim();
     const text = document.getElementById('userInput').value.trim();
     
-    if (!key || !text) return alert("Заполни все поля!");
+    if (!key || !text) return alert("Нужно ввести ключ и вопрос!");
 
     if (saveCheck.checked) {
       localStorage.setItem('_gemini_api_key', key);
+    } else {
+      localStorage.removeItem('_gemini_api_key');
     }
 
     loader.style.display = 'block';
-    outputDiv.innerText = 'Ищу рабочий канал связи...';
+    outputDiv.innerText = 'Нейросеть пишет ответ...';
     copyBtn.style.display = 'none';
 
     let instruction = "Ты — экспертный помощник ученика 7 класса. ";
     if (mode === 'solve') instruction += "Реши задачу пошагово.";
-    if (mode === 'summary') instruction += "Сделай краткий конспект.";
+    if (mode === 'summary') instruction += "Сделай краткий конспект темы.";
     if (mode === 'explain') instruction += "Объясни тему максимально просто.";
     
-    // Список адресов для обхода ошибки NOT_FOUND
-    const urls = [
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`
-    ];
+    try {
+      // ИСПОЛЬЗУЕМ gemini-pro КАК САМЫЙ СТАБИЛЬНЫЙ ВАРИАНТ ПРИ ОШИБКАХ NOT_FOUND
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
+      
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
+        })
+      });
 
-    let lastError = "";
-
-    for (let url of urls) {
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: instruction + "\n\nВопрос: " + text }] }]
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-          lastError = data.error.message;
-          continue; // Пробуем следующий URL
-        }
-
-        if (data.candidates && data.candidates[0].content) {
-          const aiText = data.candidates[0].content.parts[0].text;
-          outputDiv.innerText = aiText;
-          copyBtn.style.display = 'block';
-          loader.style.display = 'none';
-          return; // Успешно выходим
-        }
-      } catch (err) {
-        lastError = err.message;
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(`[${data.error.status}]: ${data.error.message}`);
       }
-    }
 
-    // Если всё сломалось
-    outputDiv.innerText = "⚠️ Ошибка подключения.\nПричина: " + lastError + 
-                          "\n\nСовет: Если ошибка NOT_FOUND, попробуй создать НОВЫЙ ключ в AI Studio (в новом проекте).";
-    loader.style.display = 'none';
+      if (data.candidates && data.candidates[0].content) {
+        const aiText = data.candidates[0].content.parts[0].text;
+        outputDiv.innerText = aiText;
+        copyBtn.style.display = 'block';
+      } else {
+        throw new Error("Пустой ответ. Попробуй еще раз.");
+      }
+
+    } catch (err) {
+      outputDiv.innerText = "⚠️ Ошибка: " + err.message + 
+                            "\n\nЕсли пишет NOT_FOUND, создай в AI Studio НОВЫЙ ключ через 'Create API key in NEW project'.";
+    } finally {
+      loader.style.display = 'none';
+    }
   }
 
   function copyToClipboard() {
@@ -195,11 +183,11 @@
     });
   }
 
-  // Функция просмотра кода
+  // Твоя новая кнопка "Посмотреть код"
   function showMyCode() {
     const code = document.documentElement.outerHTML;
     const codeWindow = window.open("", "_blank");
-    codeWindow.document.write("<html><head><title>Source Code</title></head><body style='background: #1e293b; color: #f8fafc; padding: 20px; font-family: monospace;'>");
+    codeWindow.document.write("<html><head><title>Код приложения</title></head><body style='background: #1e293b; color: #f8fafc; padding: 20px; font-family: monospace;'>");
     codeWindow.document.write("<h2>Твой HTML/JS Код:</h2>");
     codeWindow.document.write("<pre style='white-space: pre-wrap; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;'>" + 
       code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + 
