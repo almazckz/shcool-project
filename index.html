@@ -101,7 +101,7 @@
       text-align: center;
       font-style: italic;
     }
-    .error { color: #f87171; border-color: #f87171 !important; }
+    .error { color: #f87171; border: 1px solid #f87171 !important; }
   </style>
 </head>
 <body>
@@ -141,7 +141,7 @@
     const text = document.getElementById('userInput').value.trim();
 
     if (!key || !text) {
-      alert('Нужен ключ и вопрос!');
+      alert('Нужно ввести ключ и вопрос!');
       return;
     }
 
@@ -151,8 +151,8 @@
     output.classList.remove('error');
 
     try {
-      // ИСПОЛЬЗУЕМ ВЕРСИЮ LATEST ДЛЯ СТАБИЛЬНОСТИ
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
+      // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ v1 API И МОДЕЛЬ gemini-1.5-flash
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
 
       const response = await fetch(url, {
         method: 'POST',
