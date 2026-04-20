@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🚀 AI Помощник</title>
   <style>
-    /* Тот самый стильный дизайн из твоего примера */
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -102,7 +101,7 @@
       text-align: center;
       font-style: italic;
     }
-    .error { color: #f87171; }
+    .error { color: #f87171; border: 1px solid #f87171 !important; }
   </style>
 </head>
 <body>
@@ -152,14 +151,14 @@
     output.className = '';
 
     try {
-      // Используем gemini-1.5-flash для избежания ошибок квот
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+      // Используем стабильную версию модели 'gemini-1.5-flash-latest'
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text }] }]
+          contents: [{ parts: [{ text: text }] }]
         })
       });
 
@@ -170,7 +169,7 @@
       }
 
       const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      output.textContent = reply || 'Пустой ответ.';
+      output.textContent = reply || 'Пустой ответ от нейросети.';
 
     } catch (err) {
       output.textContent = '❌ Ошибка: ' + err.message;
@@ -182,7 +181,6 @@
   }
 
   function showMyCode() {
-    // Показывает текущий HTML код в окне ответа
     output.textContent = document.documentElement.outerHTML;
   }
 </script>
