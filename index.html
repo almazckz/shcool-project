@@ -151,7 +151,7 @@
     output.classList.remove('error');
 
     try {
-      // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ v1 API И МОДЕЛЬ gemini-1.5-flash
+      // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ v1 API И МОДЕЛЬ gemini-2.0-flash
       const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
 
       const response = await fetch(url, {
