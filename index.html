@@ -85,7 +85,7 @@
 
     <button class="btn" onclick="hackGemini()">Execute System</button>
 
-    <div id="output">SYSTEM_READY...</div>
+    <div id="output">Загрузка системы...</div>
 </div>
 
 <script>
@@ -105,7 +105,7 @@
         localStorage.setItem('master_key', key);
 
         status.style.display = 'block';
-        out.textContent = 'INITIATING SCAN...';
+        out.textContent = 'Сканирую вопрос...';
 
         try {
             // ШАГ 1: Получаем список моделей
