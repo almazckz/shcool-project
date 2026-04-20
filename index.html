@@ -1,188 +1,225 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 AI Помощник</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 15px;
-    }
-    .container {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-      border: 1px solid #334155;
-    }
-    h1 { text-align: center; color: #60a5fa; margin: 0 0 20px 0; font-size: 22px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant v3.0</title>
+    <style>
+        /* Общие стили для предотвращения лагов */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .key-wrap { position: relative; margin-bottom: 15px; }
-    .key-wrap input {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #60a5fa;
-      padding: 12px 40px 12px 12px;
-      border-radius: 10px;
-      outline: none;
-      transition: 0.3s;
-    }
-    .key-wrap button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #60a5fa;
-      cursor: pointer;
-      font-size: 16px;
-    }
+        .container {
+            background: #1e293b;
+            width: 100%;
+            max-width: 550px;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid #334155;
+        }
 
-    textarea {
-      width: 100%;
-      height: 120px;
-      color: #f8fafc;
-      background: #1e293b;
-      border: 1px solid #475569;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      outline: none;
-      resize: none;
-      font-size: 15px;
-      font-family: inherit;
-    }
-    textarea:focus { border-color: #60a5fa; }
+        h1 {
+            text-align: center;
+            color: #60a5fa;
+            margin-bottom: 25px;
+            font-size: 26px;
+        }
 
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .btn {
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 14px;
-    }
-    .btn-blue { background: #60a5fa; color: #0f172a; grid-column: span 2; margin-bottom: 5px; }
-    .btn-blue:hover { background: #93c5fd; transform: scale(0.98); }
-    .btn-gray { background: #475569; color: white; }
-    .btn-gray:hover { background: #64748b; }
+        /* Поле ключа с глазком */
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
 
-    #output {
-      background: #020617;
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      margin-top: 20px;
-      min-height: 100px;
-      white-space: pre-wrap;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-    .loader {
-      color: #fbbf24;
-      font-size: 14px;
-      display: none;
-      margin: 10px 0;
-      text-align: center;
-      font-style: italic;
-    }
-    .error { color: #f87171; border: 1px solid #f87171 !important; }
-  </style>
+        input, textarea {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: #f8fafc;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #60a5fa;
+        }
+
+        .eye-btn {
+            position: absolute;
+            right: 12px;
+            top: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        textarea {
+            height: 140px;
+            resize: none;
+            margin-bottom: 20px;
+        }
+
+        /* Кнопки */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 15px;
+        }
+
+        .btn-main {
+            background: #60a5fa;
+            color: #0f172a;
+            grid-column: span 2;
+        }
+
+        .btn-main:hover { background: #93c5fd; }
+        .btn-main:active { transform: scale(0.98); }
+
+        .btn-sec {
+            background: #334155;
+            color: #f8fafc;
+        }
+
+        .btn-sec:hover { background: #475569; }
+
+        /* Ответ */
+        #status {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #fbbf24;
+            display: none;
+        }
+
+        #output {
+            margin-top: 20px;
+            background: #020617;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .error { color: #f87171 !important; border-color: #f87171 !important; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>🚀 AI Помощник</h1>
+    <h1>🚀 Gemini AI</h1>
 
-  <div class="key-wrap">
-    <input type="password" id="apiKey" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I">
-    <button onclick="toggleKey()" id="eyeBtn">👁</button>
-  </div>
+    <div class="input-group">
+        <input type="password" id="key" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I" placeholder="Вставь свой API Key...">
+        <button class="eye-btn" onclick="toggleView()" id="eye">👁️</button>
+    </div>
 
-  <textarea id="userInput" placeholder="Напиши задачу или вопрос..."></textarea>
+    <textarea id="prompt" placeholder="Твой запрос к нейросети..."></textarea>
 
-  <div class="loader" id="loader">Нейросеть обрабатывает запрос...</div>
+    <div id="status">⚡ Нейросеть генерирует ответ...</div>
 
-  <div class="actions">
-    <button onclick="askGemini()" class="btn btn-blue">Отправить запрос</button>
-    <button onclick="document.getElementById('userInput').value = ''" class="btn btn-gray">Очистить</button>
-    <button onclick="showMyCode()" class="btn btn-gray">Мой код</button>
-  </div>
+    <div class="btn-grid">
+        <button class="btn btn-main" onclick="askAI()">ОТПРАВИТЬ</button>
+        <button class="btn btn-sec" onclick="clearAll()">ОЧИСТИТЬ</button>
+        <button class="btn btn-sec" onclick="copyResult()">КОПИРОВАТЬ</button>
+    </div>
 
-  <div id="output">Здесь появится ответ...</div>
+    <div id="output">Здесь появится результат...</div>
 </div>
 
 <script>
-  const keyField = document.getElementById('apiKey');
-  const output = document.getElementById('output');
-  const loader = document.getElementById('loader');
-
-  function toggleKey() {
-    keyField.type = keyField.type === 'password' ? 'text' : 'password';
-  }
-
-  async function askGemini() {
-    const key = keyField.value.trim();
-    const text = document.getElementById('userInput').value.trim();
-
-    if (!key || !text) {
-      alert('Нужен ключ и вопрос!');
-      return;
+    // Показать/скрыть ключ
+    function toggleView() {
+        const keyInput = document.getElementById('key');
+        keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
     }
 
-    loader.style.display = 'block';
-    output.textContent = 'Думаю...';
-    output.style.opacity = '0.5';
-    output.classList.remove('error');
-
-    try {
-      // ИСПОЛЬЗУЕМ v1beta — ТАМ ЭТА МОДЕЛЬ ТОЧНО ЕСТЬ
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: text }] }]
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error?.message || `Ошибка ${response.status}`);
-      }
-
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      output.textContent = reply || 'Пустой ответ.';
-
-    } catch (err) {
-      output.textContent = '❌ Ошибка: ' + err.message;
-      output.classList.add('error');
-    } finally {
-      loader.style.display = 'none';
-      output.style.opacity = '1';
+    // Очистка
+    function clearAll() {
+        document.getElementById('prompt').value = '';
+        const out = document.getElementById('output');
+        out.textContent = 'Здесь появится результат...';
+        out.classList.remove('error');
     }
-  }
 
-  function showMyCode() {
-    output.textContent = document.documentElement.outerHTML;
-  }
+    // Копирование
+    function copyResult() {
+        const text = document.getElementById('output').textContent;
+        navigator.clipboard.writeText(text);
+        alert('Скопировано!');
+    }
+
+    // Главная функция запроса
+    async function askAI() {
+        const key = document.getElementById('key').value.trim();
+        const text = document.getElementById('prompt').value.trim();
+        const out = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        if (!text) return alert('Введите текст запроса!');
+
+        // Подготовка интерфейса
+        status.style.display = 'block';
+        out.textContent = 'Ожидание...';
+        out.classList.remove('error');
+        out.style.opacity = '0.5';
+
+        try {
+            // Используем v1beta/gemini-1.5-flash (самый стабильный вариант)
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: text }] }]
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error?.message || 'Неизвестная ошибка API');
+            }
+
+            const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            out.textContent = aiResponse || 'Нейросеть вернула пустой ответ.';
+
+        } catch (err) {
+            out.textContent = '❌ Ошибка: ' + err.message;
+            out.classList.add('error');
+        } finally {
+            status.style.display = 'none';
+            out.style.opacity = '1';
+        }
+    }
 </script>
 
 </body>
