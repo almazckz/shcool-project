@@ -80,4 +80,112 @@
     }
     .btn-blue { background: #60a5fa; color: #0f172a; grid-column: span 2; margin-bottom: 5px; }
     .btn-blue:hover { background: #93c5fd; transform: scale(0.98); }
-    .btn-gray { background: #475569
+    .btn-gray { background: #475569; color: white; }
+    .btn-gray:hover { background: #64748b; }
+
+    #output {
+      background: #020617;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      margin-top: 20px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .loader {
+      color: #fbbf24;
+      font-size: 14px;
+      display: none;
+      margin: 10px 0;
+      text-align: center;
+      font-style: italic;
+    }
+    .error { color: #f87171; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🚀 AI Помощник</h1>
+
+  <div class="key-wrap">
+    <input type="password" id="apiKey" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I">
+    <button onclick="toggleKey()" id="eyeBtn" title="Показать/скрыть ключ">👁</button>
+  </div>
+
+  <textarea id="userInput" placeholder="Напиши задачу или вопрос..."></textarea>
+
+  <div class="loader" id="loader">Нейросеть обрабатывает запрос...</div>
+
+  <div class="actions">
+    <button onclick="askGemini()" class="btn btn-blue">Отправить запрос</button>
+    <button onclick="document.getElementById('userInput').value = ''" class="btn btn-gray">Очистить</button>
+    <button onclick="showMyCode()" class="btn btn-gray">Мой код</button>
+  </div>
+
+  <div id="output">Ответ появится здесь...</div>
+</div>
+
+<script>
+  const keyField = document.getElementById('apiKey');
+  const output = document.getElementById('output');
+  const loader = document.getElementById('loader');
+
+  function toggleKey() {
+    keyField.type = keyField.type === 'password' ? 'text' : 'password';
+  }
+
+  async function askGemini() {
+    const key = keyField.value.trim();
+    const text = document.getElementById('userInput').value.trim();
+
+    if (!key || !text) {
+      alert('Нужно ввести ключ и вопрос!');
+      return;
+    }
+
+    loader.style.display = 'block';
+    output.textContent = 'Думаю...';
+    output.style.opacity = '0.5';
+    output.className = '';
+
+    try {
+      // Используем gemini-1.5-flash для избежания ошибок квот
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text }] }]
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error?.message || `Ошибка ${response.status}`);
+      }
+
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      output.textContent = reply || 'Пустой ответ.';
+
+    } catch (err) {
+      output.textContent = '❌ Ошибка: ' + err.message;
+      output.classList.add('error');
+    } finally {
+      loader.style.display = 'none';
+      output.style.opacity = '1';
+    }
+  }
+
+  function showMyCode() {
+    // Показывает текущий HTML код в окне ответа
+    output.textContent = document.documentElement.outerHTML;
+  }
+</script>
+
+</body>
+</html>
