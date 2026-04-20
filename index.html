@@ -3,130 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Space Terminal</title>
+    <title>Private AI Terminal</title>
     <style>
+        :root {
+            --accent: #10b981; /* Зеленый "безопасный" цвет */
+            --bg: #020617;
+            --surface: #1e293b;
+        }
+
         body {
-            background: #020617;
-            color: #e2e8f0;
-            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: #f1f5f9;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
-        .app-container {
-            width: 90%;
-            max-width: 550px;
-            background: #0f172a;
-            border: 1px solid #1e293b;
-            border-radius: 20px;
+
+        .app-card {
+            width: 100%;
+            max-width: 500px;
+            background: var(--surface);
             padding: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
         }
-        h2 { color: #38bdf8; text-align: center; margin-bottom: 20px; font-weight: 400; }
-        
-        .field-label { font-size: 12px; color: #94a3b8; margin-bottom: 5px; display: block; }
-        
+
+        h2 { text-align: center; margin-bottom: 25px; color: var(--accent); font-weight: 300; }
+
+        .group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
         input, textarea {
             width: 100%;
-            background: #020617;
-            border: 1px solid #334155;
-            color: #f1f5f9;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 14px;
+            border-radius: 12px;
             outline: none;
             transition: 0.3s;
+            font-size: 15px;
         }
-        input:focus, textarea:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-        
-        textarea { height: 150px; resize: none; line-height: 1.5; }
 
-        .btn-run {
-            width: 100%;
-            background: #38bdf8;
-            color: #0f172a;
-            border: none;
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+
+        textarea { height: 120px; resize: none; }
+
+        .actions { display: flex; flex-direction: column; gap: 10px; }
+
+        .btn {
             padding: 15px;
-            border-radius: 10px;
-            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
             cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.3s;
+            transition: 0.2s;
+            font-size: 15px;
         }
-        .btn-run:hover { background: #7dd3fc; transform: translateY(-2px); }
 
-        #response {
-            margin-top: 20px;
+        .btn-run { background: var(--accent); color: #064e3b; }
+        .btn-run:hover { background: #34d399; transform: translateY(-2px); }
+
+        .btn-save { background: #334155; color: #fff; font-size: 12px; padding: 8px; }
+
+        #output {
+            margin-top: 25px;
             padding: 15px;
             background: #020617;
-            border-radius: 10px;
-            border: 1px solid #1e293b;
-            min-height: 100px;
-            max-height: 300px;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
+            min-height: 80px;
+            max-height: 250px;
             overflow-y: auto;
             white-space: pre-wrap;
             font-size: 14px;
+            color: #cbd5e1;
         }
-        .loader { color: #fbbf24; text-align: center; display: none; margin-bottom: 10px; }
-        .error-msg { color: #f87171; }
+
+        .status { font-size: 12px; text-align: center; margin-bottom: 10px; color: #fbbf24; display: none; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <h2>GEMINI 2.0 FLASH</h2>
+<div class="app-card">
+    <h2>PRIVATE AI</h2>
     
-    <span class="field-label">API KEY</span>
-    <input type="password" id="apiKey" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I">
-    
-    <span class="field-label">ВАШ ЗАПРОС</span>
-    <textarea id="prompt" placeholder="Напишите задачу..."></textarea>
-    
-    <div id="loader" class="loader">Связь установлена, генерирую...</div>
-    
-    <button class="btn-run" onclick="callGemini()">ЗАПУСТИТЬ</button>
+    <div class="group">
+        <label>Ваш личный API Key</label>
+        <input type="password" id="userKey" placeholder="Вставьте ключ здесь...">
+        <button class="btn btn-save" onclick="saveKey()" style="margin-top: 5px; width: 100%;">Запомнить ключ на этом устройстве</button>
+    </div>
 
-    <div id="response">Консоль готова.</div>
+    <div class="group">
+        <label>Ваш запрос</label>
+        <textarea id="userPrompt" placeholder="Напишите вопрос нейросети..."></textarea>
+    </div>
+
+    <div id="status" class="status">⚡ Соединение с Gemini...</div>
+
+    <div class="actions">
+        <button class="btn btn-run" onclick="startGeneration()">ОТПРАВИТЬ ЗАПРОС</button>
+    </div>
+
+    <div id="output">Результат появится здесь...</div>
 </div>
 
 <script>
-    async function callGemini() {
-        const key = document.getElementById('apiKey').value.trim();
-        const text = document.getElementById('prompt').value.trim();
-        const output = document.getElementById('response');
-        const loader = document.getElementById('loader');
+    // При загрузке проверяем, есть ли сохраненный ключ
+    window.onload = () => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) {
+            document.getElementById('userKey').value = savedKey;
+        }
+    };
 
-        if (!text) return alert('Введите текст!');
+    function saveKey() {
+        const key = document.getElementById('userKey').value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            alert('Ключ сохранен локально!');
+        }
+    }
 
-        loader.style.display = 'block';
-        output.textContent = '...';
+    async function startGeneration() {
+        const key = document.getElementById('userKey').value.trim();
+        const text = document.getElementById('userPrompt').value.trim();
+        const out = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        if (!key) return alert('Сначала введите API Key!');
+        if (!text) return alert('Введите запрос!');
+
+        status.style.display = 'block';
+        out.textContent = 'Генерация...';
+        out.style.opacity = '0.5';
 
         try {
-            // ИСПОЛЬЗУЕМ САМУЮ НОВУЮ МОДЕЛЬ GEMINI 2.0 FLASH
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
-            
-            const res = await fetch(url, {
+            // Используем универсальную модель 1.5 Flash (самая стабильная для новых ключей)
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: text }] }]
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
             });
 
-            const data = await res.json();
+            const data = await response.json();
 
-            if (!res.ok) {
-                throw new Error(data.error?.message || 'Ошибка системы');
+            if (!response.ok) {
+                throw new Error(data.error?.message || 'Ошибка API');
             }
 
-            output.textContent = data.candidates[0].content.parts[0].text;
+            out.textContent = data.candidates[0].content.parts[0].text;
 
         } catch (e) {
-            output.innerHTML = `<span class="error-msg">Критическая ошибка: ${e.message}</span><br><br><b>Совет:</b> Попробуйте создать НОВЫЙ ключ в Google AI Studio, этот ключ может быть неактивен.`;
+            out.innerHTML = `<span style="color:#f87171">Ошибка: ${e.message}</span>`;
         } finally {
-            loader.style.display = 'none';
+            status.style.display = 'none';
+            out.style.opacity = '1';
         }
     }
 </script>
