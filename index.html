@@ -3,159 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACID AI STUDIO</title>
+    <title>AI Infinity Node</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
-            background: #dfff00; /* Кислотный лимонный */
-            color: #000;
-            font-family: 'Arial Black', sans-serif;
+            background: #0b0d0f;
+            color: #e1e3e6;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
         }
-
-        .main-card {
-            background: #fff;
-            border: 4px solid #000;
-            box-shadow: 10px 10px 0px #000;
+        .container {
+            background: #1a1c1e;
             width: 100%;
             max-width: 500px;
             padding: 30px;
+            border-radius: 28px;
+            border: 1px solid #2d3033;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-
-        h1 {
-            font-size: 35px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            line-height: 0.8;
-            background: #000;
-            color: #dfff00;
-            padding: 10px;
-            display: inline-block;
-        }
-
-        .input-group { margin-bottom: 20px; }
-        label { display: block; text-transform: uppercase; font-size: 14px; margin-bottom: 5px; }
-
+        h2 { color: #82daff; font-weight: 300; margin-bottom: 20px; text-align: center; }
+        
+        .box { margin-bottom: 15px; }
+        label { display: block; font-size: 11px; color: #8e9194; margin-bottom: 6px; text-transform: uppercase; }
+        
         input, textarea {
             width: 100%;
-            border: 3px solid #000;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            outline: none;
-        }
-
-        textarea { height: 120px; resize: none; font-family: 'Courier New', monospace; }
-
-        .btn {
-            width: 100%;
-            padding: 20px;
-            background: #000;
+            background: #25282b;
+            border: 1px solid #3d4145;
             color: #fff;
-            border: none;
-            font-size: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.1s;
-            margin-bottom: 10px;
+            padding: 14px;
+            border-radius: 12px;
+            outline: none;
+            transition: 0.2s;
         }
+        input:focus, textarea:focus { border-color: #82daff; background: #2a2d31; }
+        
+        textarea { height: 120px; resize: none; font-size: 15px; }
 
-        .btn:hover { background: #ff00ff; color: #fff; transform: translate(-2px, -2px); box-shadow: 4px 4px 0px #000; }
-        .btn:active { transform: translate(0, 0); box-shadow: none; }
-
-        .btn-clear { background: #fff; color: #000; border: 3px solid #000; font-size: 14px; padding: 10px; }
-
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            background: #82daff;
+            color: #003547;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .btn-main:hover { background: #b3e9ff; transform: scale(1.02); }
+        
         #output {
             margin-top: 20px;
-            border: 3px solid #000;
             padding: 15px;
-            background: #f0f0f0;
-            min-height: 80px;
-            max-height: 250px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 14px;
+            min-height: 60px;
+            max-height: 300px;
             overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 1px solid #2d3033;
+            color: #d1d4d7;
         }
-
-        .loading { display: none; color: #ff00ff; margin-bottom: 10px; text-transform: uppercase; }
+        .loading { display: none; color: #fbbf24; text-align: center; margin-bottom: 10px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <h1>ACID_AI_GEN</h1>
-
-    <div class="input-group">
-        <label>Personal Key</label>
-        <input type="password" id="apiKey" placeholder="ENTER_API_KEY">
+<div class="container">
+    <h2>Infinity AI</h2>
+    
+    <div class="box">
+        <label>Personal API Key</label>
+        <input type="password" id="apiKey" placeholder="Вставьте ключ...">
     </div>
 
-    <div class="input-group">
-        <label>Input Prompt</label>
-        <textarea id="prompt" placeholder="TYPE_COMMAND_HERE..."></textarea>
+    <div class="box">
+        <label>Your Prompt</label>
+        <textarea id="prompt" placeholder="О чем спросим?"></textarea>
     </div>
 
-    <div id="loader" class="loading">>>> CONNECTING_TO_BRAIN...</div>
+    <div id="loader" class="loading">📡 Поиск доступной модели и генерация...</div>
 
-    <button class="btn" onclick="askAI()">Run Command</button>
-    <button class="btn btn-clear" onclick="clearAll()">Reset</button>
+    <button class="btn-main" onclick="run()">ОТПРАВИТЬ ЗАПРОС</button>
 
-    <div id="output">SYSTEM_READY...</div>
+    <div id="output">Готов к работе.</div>
 </div>
 
 <script>
-    // Авто-загрузка ключа
+    // Авто-заполнение ключа
     window.onload = () => {
-        const key = localStorage.getItem('acid_key');
-        if (key) document.getElementById('apiKey').value = key;
+        const saved = localStorage.getItem('inf_key');
+        if (saved) document.getElementById('apiKey').value = saved;
     };
 
-    function clearAll() {
-        document.getElementById('prompt').value = '';
-        document.getElementById('output').textContent = 'SYSTEM_RESET...';
-    }
-
-    async function askAI() {
+    async function run() {
         const key = document.getElementById('apiKey').value.trim();
         const text = document.getElementById('prompt').value.trim();
         const out = document.getElementById('output');
         const loader = document.getElementById('loader');
 
-        if (!key || !text) return alert('MISSING_DATA!');
+        if (!key || !text) return alert('Ключ и текст обязательны!');
+        localStorage.setItem('inf_key', key);
 
-        localStorage.setItem('acid_key', key);
         loader.style.display = 'block';
-        out.textContent = 'PROCESSING...';
+        out.style.opacity = '0.5';
 
         try {
-            // gemini-pro — самая "неубиваемая" модель для ветки v1beta
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
+            // ШАГ 1: Спрашиваем список доступных моделей
+            const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
+            const listRes = await fetch(listUrl);
+            const listData = await listRes.json();
+
+            if (!listRes.ok) throw new Error(listData.error?.message || 'Ошибка ключа');
+
+            // Находим первую модель, поддерживающую генерацию контента
+            const model = listData.models.find(m => m.supportedGenerationMethods.includes('generateContent'));
             
-            const response = await fetch(url, {
+            if (!model) throw new Error('Нет доступных моделей для этого ключа');
+
+            // ШАГ 2: Отправляем запрос именно к этой модели
+            const genUrl = `https://generativelanguage.googleapis.com/v1beta/${model.name}:generateContent?key=${key}`;
+            
+            const genRes = await fetch(genUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
             });
 
-            const data = await response.json();
+            const genData = await genRes.json();
+            
+            if (!genRes.ok) throw new Error(genData.error?.message || 'Ошибка генерации');
 
-            if (!response.ok) {
-                throw new Error(data.error?.message || 'API_FAILURE');
-            }
-
-            out.textContent = data.candidates[0].content.parts[0].text;
+            out.textContent = genData.candidates[0].content.parts[0].text;
 
         } catch (e) {
-            out.innerHTML = `<span style="color:red">ERROR: ${e.message}</span>`;
+            out.innerHTML = `<span style="color:#ff7b7b">Критическая ошибка: ${e.message}</span>`;
         } finally {
             loader.style.display = 'none';
+            out.style.opacity = '1';
         }
     }
 </script>
