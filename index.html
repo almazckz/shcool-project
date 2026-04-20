@@ -124,7 +124,7 @@
     <button onclick="showMyCode()" class="btn btn-gray">Мой код</button>
   </div>
 
-  <div id="output">Ответ появится здесь...</div>
+  <div id="output">Здесь появится ответ...</div>
 </div>
 
 <script>
@@ -141,49 +141,15 @@
     const text = document.getElementById('userInput').value.trim();
 
     if (!key || !text) {
-      alert('Нужно ввести ключ и вопрос!');
+      alert('Нужен ключ и текст!');
       return;
     }
 
     loader.style.display = 'block';
     output.textContent = 'Думаю...';
-    output.style.opacity = '0.5';
     output.classList.remove('error');
+    output.style.opacity = '0.5';
 
     try {
-      // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ v1 API И МОДЕЛЬ gemini-2.0-flash
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: text }] }]
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.error?.message || `Ошибка ${response.status}`);
-      }
-
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      output.textContent = reply || 'Пустой ответ.';
-
-    } catch (err) {
-      output.textContent = '❌ Ошибка: ' + err.message;
-      output.classList.add('error');
-    } finally {
-      loader.style.display = 'none';
-      output.style.opacity = '1';
-    }
-  }
-
-  function showMyCode() {
-    output.textContent = document.documentElement.outerHTML;
-  }
-</script>
-
-</body>
-</html>
+      // ИСПОЛЬЗУЕМ v1beta и модель gemini-pro (самая совместимая)
+      const url = `https://generativ
