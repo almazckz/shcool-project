@@ -1,169 +1,133 @@
-<Bosh #2>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Glass Assistant</title>
+    <title>AI Space Terminal</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Inter', -apple-system, sans-serif;
+            background: #020617;
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: #2d3436;
+            margin: 0;
         }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 24px;
-            padding: 40px;
+        .app-container {
             width: 90%;
-            max-width: 500px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            max-width: 550px;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
-
-        h2 { text-align: center; color: #fff; margin-bottom: 25px; font-weight: 300; letter-spacing: 1px; }
-
+        h2 { color: #38bdf8; text-align: center; margin-bottom: 20px; font-weight: 400; }
+        
+        .field-label { font-size: 12px; color: #94a3b8; margin-bottom: 5px; display: block; }
+        
         input, textarea {
             width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 12px;
-            padding: 15px;
+            background: #020617;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            padding: 12px;
+            border-radius: 10px;
             margin-bottom: 15px;
-            font-size: 15px;
             outline: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
+        input:focus, textarea:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+        
+        textarea { height: 150px; resize: none; line-height: 1.5; }
 
-        textarea { height: 120px; resize: none; }
-
-        .btn-send {
+        .btn-run {
             width: 100%;
-            background: #2d3436;
-            color: white;
+            background: #38bdf8;
+            color: #0f172a;
             border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            text-transform: uppercase;
+            transition: 0.3s;
         }
+        .btn-run:hover { background: #7dd3fc; transform: translateY(-2px); }
 
-        .btn-send:hover { background: #000; transform: translateY(-2px); }
-
-        .btn-clear {
-            width: 100%;
-            background: transparent;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.5);
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        #output {
-            margin-top: 25px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 16px;
-            font-size: 15px;
-            line-height: 1.6;
-            min-height: 80px;
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #020617;
+            border-radius: 10px;
+            border: 1px solid #1e293b;
+            min-height: 100px;
             max-height: 300px;
             overflow-y: auto;
-            color: #333;
+            white-space: pre-wrap;
+            font-size: 14px;
         }
-
-        .loading {
-            text-align: center;
-            color: #fff;
-            font-size: 13px;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        .error { color: #d63031 !important; font-weight: bold; }
+        .loader { color: #fbbf24; text-align: center; display: none; margin-bottom: 10px; }
+        .error-msg { color: #f87171; }
     </style>
 </head>
 <body>
 
-<div class="glass-card">
-    <h2>Smart AI</h2>
+<div class="app-container">
+    <h2>GEMINI 2.0 FLASH</h2>
     
-    <input type="password" id="apiKey" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I" placeholder="API Key">
-    <textarea id="prompt" placeholder="Твой вопрос..."></textarea>
+    <span class="field-label">API KEY</span>
+    <input type="password" id="apiKey" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I">
     
-    <div id="loader" class="loading">Обработка запроса...</div>
+    <span class="field-label">ВАШ ЗАПРОС</span>
+    <textarea id="prompt" placeholder="Напишите задачу..."></textarea>
     
-    <button class="btn-send" onclick="askAI()">ОТПРАВИТЬ</button>
-    <button class="btn-clear" onclick="document.getElementById('prompt').value=''">Очистить поле</button>
+    <div id="loader" class="loader">Связь установлена, генерирую...</div>
+    
+    <button class="btn-run" onclick="callGemini()">ЗАПУСТИТЬ</button>
 
-    <div id="output">Результат...</div>
+    <div id="response">Консоль готова.</div>
 </div>
 
 <script>
-    async function askAI() {
+    async function callGemini() {
         const key = document.getElementById('apiKey').value.trim();
         const text = document.getElementById('prompt').value.trim();
-        const out = document.getElementById('output');
+        const output = document.getElementById('response');
         const loader = document.getElementById('loader');
 
         if (!text) return alert('Введите текст!');
 
         loader.style.display = 'block';
-        out.textContent = 'Думаю...';
-        out.classList.remove('error');
+        output.textContent = '...';
 
-        // Список моделей для проверки (если одна не найдена, пробуем другую)
-        const models = ['gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-pro'];
-        let success = false;
-
-        for (let model of models) {
-            if (success) break;
+        try {
+            // ИСПОЛЬЗУЕМ САМУЮ НОВУЮ МОДЕЛЬ GEMINI 2.0 FLASH
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
             
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-                });
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: text }] }]
+                })
+            });
 
-                const data = await response.json();
+            const data = await res.json();
 
-                if (response.ok) {
-                    out.textContent = data.candidates[0].content.parts[0].text;
-                    success = true;
-                } else if (data.error && data.error.message.includes('not found')) {
-                    console.log(`Модель ${model} не найдена, пробуем следующую...`);
-                    continue; // Пробуем следующую модель в списке
-                } else {
-                    throw new Error(data.error?.message || 'Ошибка API');
-                }
-            } catch (err) {
-                out.textContent = '❌ ' + err.message;
-                out.classList.add('error');
-                break;
+            if (!res.ok) {
+                throw new Error(data.error?.message || 'Ошибка системы');
             }
-        }
 
-        if (!success && !out.classList.contains('error')) {
-            out.textContent = '❌ Не удалось найти рабочую модель. Проверьте ключ.';
-            out.classList.add('error');
+            output.textContent = data.candidates[0].content.parts[0].text;
+
+        } catch (e) {
+            output.innerHTML = `<span class="error-msg">Критическая ошибка: ${e.message}</span><br><br><b>Совет:</b> Попробуйте создать НОВЫЙ ключ в Google AI Studio, этот ключ может быть неактивен.`;
+        } finally {
+            loader.style.display = 'none';
         }
-        
-        loader.style.display = 'none';
     }
 </script>
 
