@@ -141,15 +141,49 @@
     const text = document.getElementById('userInput').value.trim();
 
     if (!key || !text) {
-      alert('Нужен ключ и текст!');
+      alert('Нужен ключ и вопрос!');
       return;
     }
 
     loader.style.display = 'block';
     output.textContent = 'Думаю...';
-    output.classList.remove('error');
     output.style.opacity = '0.5';
+    output.classList.remove('error');
 
     try {
-      // ИСПОЛЬЗУЕМ v1beta и модель gemini-pro (самая совместимая)
-      const url = `https://generativ
+      // ИСПОЛЬЗУЕМ v1beta — ТАМ ЭТА МОДЕЛЬ ТОЧНО ЕСТЬ
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: text }] }]
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error?.message || `Ошибка ${response.status}`);
+      }
+
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      output.textContent = reply || 'Пустой ответ.';
+
+    } catch (err) {
+      output.textContent = '❌ Ошибка: ' + err.message;
+      output.classList.add('error');
+    } finally {
+      loader.style.display = 'none';
+      output.style.opacity = '1';
+    }
+  }
+
+  function showMyCode() {
+    output.textContent = document.documentElement.outerHTML;
+  }
+</script>
+
+</body>
+</html>
