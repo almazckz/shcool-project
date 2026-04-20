@@ -3,222 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant v3.0</title>
+    <title>Neon Gemini AI</title>
     <style>
-        /* Общие стили для предотвращения лагов */
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --bg-dark: #050505;
+            --card-bg: rgba(20, 20, 20, 0.8);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050505 100%);
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
-            background: #1e293b;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
             width: 100%;
-            max-width: 550px;
-            padding: 30px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            border: 1px solid #334155;
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
         }
 
         h1 {
             text-align: center;
-            color: #60a5fa;
-            margin-bottom: 25px;
-            font-size: 26px;
+            font-size: 32px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.5));
         }
 
-        /* Поле ключа с глазком */
-        .input-group {
+        .input-box {
             position: relative;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         input, textarea {
             width: 100%;
-            background: #0f172a;
-            border: 1px solid #475569;
-            color: #f8fafc;
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 16px;
             outline: none;
-            transition: border 0.3s;
+            transition: all 0.3s;
         }
 
         input:focus, textarea:focus {
-            border-color: #60a5fa;
-        }
-
-        .eye-btn {
-            position: absolute;
-            right: 12px;
-            top: 10px;
-            background: none;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            font-size: 18px;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
         }
 
         textarea {
-            height: 140px;
+            height: 150px;
             resize: none;
-            margin-bottom: 20px;
         }
 
-        /* Кнопки */
-        .btn-grid {
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .main-btn {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            color: #fff;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.4s;
+            box-shadow: 0 5px 15px rgba(188, 19, 254, 0.4);
+        }
+
+        .main-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 242, 255, 0.6);
+            letter-spacing: 2px;
+        }
+
+        .secondary-btns {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .btn {
-            padding: 14px;
-            border: none;
+        .sec-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 12px;
             border-radius: 12px;
-            font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-            font-size: 15px;
+            transition: 0.3s;
         }
 
-        .btn-main {
-            background: #60a5fa;
-            color: #0f172a;
-            grid-column: span 2;
-        }
-
-        .btn-main:hover { background: #93c5fd; }
-        .btn-main:active { transform: scale(0.98); }
-
-        .btn-sec {
-            background: #334155;
-            color: #f8fafc;
-        }
-
-        .btn-sec:hover { background: #475569; }
-
-        /* Ответ */
-        #status {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #fbbf24;
-            display: none;
+        .sec-btn:hover {
+            border-color: #fff;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         #output {
-            margin-top: 20px;
-            background: #020617;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            min-height: 100px;
-            max-height: 400px;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            border-left: 4px solid var(--neon-purple);
+            font-size: 15px;
+            line-height: 1.7;
+            max-height: 300px;
             overflow-y: auto;
-            white-space: pre-wrap;
-            line-height: 1.6;
+            color: #e0e0e0;
         }
 
-        .error { color: #f87171 !important; border-color: #f87171 !important; }
+        .loading-text {
+            color: var(--neon-blue);
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; text-shadow: 0 0 10px var(--neon-blue); }
+            100% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🚀 Gemini AI</h1>
+    <h1>Cyber Gemini</h1>
 
-    <div class="input-group">
-        <input type="password" id="key" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I" placeholder="Вставь свой API Key...">
-        <button class="eye-btn" onclick="toggleView()" id="eye">👁️</button>
+    <div class="input-box">
+        <input type="password" id="key" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I" placeholder="API Key">
     </div>
 
-    <textarea id="prompt" placeholder="Твой запрос к нейросети..."></textarea>
+    <textarea id="prompt" placeholder="Введите команду для ИИ..."></textarea>
 
-    <div id="status">⚡ Нейросеть генерирует ответ...</div>
+    <div id="loader" class="loading-text">СИНХРОНИЗАЦИЯ С НЕЙРОСЕТЬЮ...</div>
 
-    <div class="btn-grid">
-        <button class="btn btn-main" onclick="askAI()">ОТПРАВИТЬ</button>
-        <button class="btn btn-sec" onclick="clearAll()">ОЧИСТИТЬ</button>
-        <button class="btn btn-sec" onclick="copyResult()">КОПИРОВАТЬ</button>
+    <div class="btn-group">
+        <button class="main-btn" onclick="runAI()">Запустить</button>
+        <div class="secondary-btns">
+            <button class="sec-btn" onclick="document.getElementById('prompt').value=''">Очистить</button>
+            <button class="sec-btn" onclick="copyText()">Копировать</button>
+        </div>
     </div>
 
-    <div id="output">Здесь появится результат...</div>
+    <div id="output">Консоль готова к работе...</div>
 </div>
 
 <script>
-    // Показать/скрыть ключ
-    function toggleView() {
-        const keyInput = document.getElementById('key');
-        keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
-    }
-
-    // Очистка
-    function clearAll() {
-        document.getElementById('prompt').value = '';
-        const out = document.getElementById('output');
-        out.textContent = 'Здесь появится результат...';
-        out.classList.remove('error');
-    }
-
-    // Копирование
-    function copyResult() {
-        const text = document.getElementById('output').textContent;
-        navigator.clipboard.writeText(text);
-        alert('Скопировано!');
-    }
-
-    // Главная функция запроса
-    async function askAI() {
+    async function runAI() {
         const key = document.getElementById('key').value.trim();
         const text = document.getElementById('prompt').value.trim();
         const out = document.getElementById('output');
-        const status = document.getElementById('status');
+        const loader = document.getElementById('loader');
 
-        if (!text) return alert('Введите текст запроса!');
+        if (!text) return alert('Введите запрос!');
 
-        // Подготовка интерфейса
-        status.style.display = 'block';
-        out.textContent = 'Ожидание...';
-        out.classList.remove('error');
-        out.style.opacity = '0.5';
+        loader.style.display = 'block';
+        out.style.opacity = '0.4';
 
         try {
-            // Используем v1beta/gemini-1.5-flash (самый стабильный вариант)
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: text }] }]
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
             });
 
             const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.error?.message || 'Неизвестная ошибка API');
+            if (data.error) {
+                out.innerHTML = `<span style="color:#ff4d4d">ERROR: ${data.error.message}</span>`;
+            } else {
+                out.textContent = data.candidates[0].content.parts[0].text;
             }
-
-            const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            out.textContent = aiResponse || 'Нейросеть вернула пустой ответ.';
-
-        } catch (err) {
-            out.textContent = '❌ Ошибка: ' + err.message;
-            out.classList.add('error');
+        } catch (e) {
+            out.innerHTML = `<span style="color:#ff4d4d">SYSTEM FAILURE: ${e.message}</span>`;
         } finally {
-            status.style.display = 'none';
+            loader.style.display = 'none';
             out.style.opacity = '1';
         }
+    }
+
+    function copyText() {
+        const out = document.getElementById('output').textContent;
+        navigator.clipboard.writeText(out);
+        alert('Данные скопированы в буфер');
     }
 </script>
 
