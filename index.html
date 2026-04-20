@@ -101,7 +101,7 @@
       text-align: center;
       font-style: italic;
     }
-    .error { color: #f87171; border: 1px solid #f87171 !important; }
+    .error { color: #f87171; border-color: #f87171 !important; }
   </style>
 </head>
 <body>
@@ -111,7 +111,7 @@
 
   <div class="key-wrap">
     <input type="password" id="apiKey" value="AIzaSyBuKzQNRJehQSjlWzgMgSSYzYYe_Zehx8I">
-    <button onclick="toggleKey()" id="eyeBtn" title="Показать/скрыть ключ">👁</button>
+    <button onclick="toggleKey()" id="eyeBtn">👁</button>
   </div>
 
   <textarea id="userInput" placeholder="Напиши задачу или вопрос..."></textarea>
@@ -141,17 +141,17 @@
     const text = document.getElementById('userInput').value.trim();
 
     if (!key || !text) {
-      alert('Нужно ввести ключ и вопрос!');
+      alert('Нужен ключ и вопрос!');
       return;
     }
 
     loader.style.display = 'block';
     output.textContent = 'Думаю...';
     output.style.opacity = '0.5';
-    output.className = '';
+    output.classList.remove('error');
 
     try {
-      // Используем стабильную версию модели 'gemini-1.5-flash-latest'
+      // ИСПОЛЬЗУЕМ ВЕРСИЮ LATEST ДЛЯ СТАБИЛЬНОСТИ
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
 
       const response = await fetch(url, {
@@ -169,7 +169,7 @@
       }
 
       const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      output.textContent = reply || 'Пустой ответ от нейросети.';
+      output.textContent = reply || 'Пустой ответ.';
 
     } catch (err) {
       output.textContent = '❌ Ошибка: ' + err.message;
